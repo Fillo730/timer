@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import './App.css'
+import './App.css';
+import INTERVAL_DIMENSION_DEFAULT from './DefaultInterval';
 
-const INTERVAL_DIMENSION = 300; // Dimension of the interval of timer
+import Configuration from './Configuration';
 
 function App() {
-  const [seconds, setSeconds] = useState(INTERVAL_DIMENSION);
+  const [seconds, setSeconds] = useState(INTERVAL_DIMENSION_DEFAULT);
   const [isActive, setIsActive] = useState(false);
+  const [intervalTimer, setIntervalTimer] = useState(0);
+  const [isConfiguration, setIsConfiguration] = useState(true);
 
   function handleStart() {
     setIsActive(true);
@@ -17,7 +20,24 @@ function App() {
 
   function handleRestart() {
     setIsActive(false);
-    setSeconds(INTERVAL_DIMENSION);
+    setSeconds(intervalTimer);
+  }
+
+  function handleChangeInterval(e) {
+    setIntervalTimer(parseInt(e.target.value, 10));
+  }
+
+  function handleBackConfiguration() {
+    setIsConfiguration(true);
+  }
+
+  function handleProceed() {
+    if(intervalTimer === 0) {
+      return;
+    }
+    setIsConfiguration(false);
+    setSeconds(intervalTimer);
+    setIsActive(false);
   }
 
   useEffect(() => {
@@ -39,6 +59,16 @@ function App() {
     return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
   }
 
+  if (isConfiguration) {
+    return (
+      <Configuration
+      intervalTimer={intervalTimer}
+        handleChangeInterval={handleChangeInterval}
+        handleProceed={handleProceed}
+      />
+    );
+  }
+
   return (
     <div className='app'>
       <div className='app__timer'>
@@ -49,6 +79,10 @@ function App() {
         <button className="app__buttons-startButton" onClick={handleStart}>Start</button>
         <button className='app__buttons-stopButton' onClick={handleStop}>Stop</button>
         <button className='app__buttons-restartButton' onClick={handleRestart}>Restart</button>
+      </div>
+      <div className='app__goBackConfiguration'>
+        <p>If you'd like to adjust the timer duration, you can return to the configuration screen by clicking the button below:</p>
+        <button className='app__goBackConfiguration_button' onClick={handleBackConfiguration}>Back to Configuration</button>
       </div>
     </div>
   );
