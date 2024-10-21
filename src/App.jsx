@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './App.css';
 import INTERVAL_DIMENSION_DEFAULT from './DefaultInterval';
 
@@ -9,13 +9,28 @@ function App() {
   const [isActive, setIsActive] = useState(false);
   const [intervalTimer, setIntervalTimer] = useState(0);
   const [isConfiguration, setIsConfiguration] = useState(true);
+  const intervalRef = useRef(null);
 
   function handleStart() {
-    setIsActive(true);
+    if(!isActive) {
+      setIsActive(true);
+      intervalRef.current = setInterval(() => {
+        setSeconds((prevSeconds) => {
+          if(prevSeconds <= 1) {
+            setIsActive(false);
+            clearInterval(intervalRef.current);
+            return 0;
+          }
+          else
+            return prevSeconds-1;
+        })
+      },1000)
+    }
   }
 
   function handleStop() {
     setIsActive(false);
+    clearInterval(intervalRef.current);
   }
 
   function handleRestart() {
@@ -39,19 +54,6 @@ function App() {
     setSeconds(intervalTimer);
     setIsActive(false);
   }
-
-  useEffect(() => {
-    let interval;
-    if (isActive && seconds > 0) {
-      interval = setInterval(() => {
-        setSeconds((prevSeconds) => prevSeconds - 1);
-      }, 1000);
-    } else if (seconds === 0) {
-      clearInterval(interval);
-      setIsActive(false);
-    }
-    return () => clearInterval(interval);
-  }, [seconds, isActive]);
 
   function formatTimer() {
     const minutes = Math.floor(seconds / 60);
